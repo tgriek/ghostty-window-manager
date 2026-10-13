@@ -3,7 +3,7 @@ import Testing
 import GridCore
 
 @Suite struct InitialInputTests {
-    @Test func defaultsToCds() { #expect(GhosttyScript.initialInput(cmd: nil) == "cds\n") }
+    @Test func defaultsToClaude() { #expect(GhosttyScript.initialInput(cmd: nil) == "claude\n") }
     @Test func emptyMeansPlainShell() { #expect(GhosttyScript.initialInput(cmd: "") == "") }
     @Test func appendsNewline() { #expect(GhosttyScript.initialInput(cmd: "npm test") == "npm test\n") }
     @Test func doesNotDoubleNewline() { #expect(GhosttyScript.initialInput(cmd: "ls\n") == "ls\n") }
@@ -12,7 +12,7 @@ import GridCore
 
 @Suite struct LiteralTests {
     @Test func escapesNewline() {
-        #expect(GhosttyScript.literal("cds\n") == #""cds\n""#)
+        #expect(GhosttyScript.literal("claude\n") == #""claude\n""#)
     }
 
     @Test func escapesQuotesAndBackslashes() {
@@ -30,7 +30,7 @@ import GridCore
     /// Runs `return <literal>` through AppleScript (no app involved) and checks the text survives.
     @Test(arguments: [
         "/Users/me/My Project", #"/tmp/"quoted" dir"#, #"/tmp/back\slash"#,
-        "/tmp/ünï 🚀", "/tmp/new\nline", "tab\there\r\n", "cds\n", "",
+        "/tmp/ünï 🚀", "/tmp/new\nline", "tab\there\r\n", "claude\n", "",
     ])
     @MainActor
     func roundTripsThroughAppleScript(text: String) throws {
@@ -44,12 +44,12 @@ import GridCore
 
 @Suite struct NewWindowScriptTests {
     @Test func buildsFullScript() {
-        let source = GhosttyScript.newWindow(workingDirectory: "/Users/me/proj", input: "cds\n")
+        let source = GhosttyScript.newWindow(workingDirectory: "/Users/me/proj", input: "claude\n")
         #expect(source == """
             tell application id "com.mitchellh.ghostty"
                 set cfg to new surface configuration
                 set initial working directory of cfg to "/Users/me/proj"
-                set initial input of cfg to "cds\\n"
+                set initial input of cfg to "claude\\n"
                 new window with configuration cfg
             end tell
             """)
@@ -67,7 +67,7 @@ import GridCore
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
         let source = dir.appendingPathComponent("new-window.applescript")
-        try GhosttyScript.newWindow(workingDirectory: #"/tmp/a "b" \c"#, input: "cds\n")
+        try GhosttyScript.newWindow(workingDirectory: #"/tmp/a "b" \c"#, input: "claude\n")
             .write(to: source, atomically: true, encoding: .utf8)
 
         let process = Process()

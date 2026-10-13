@@ -10,6 +10,7 @@ enum GwmError: Error, CustomStringConvertible {
     case windowTimeout(placed: Int, total: Int)
     case ghosttyNotFound
     case grid(GridError)
+    case config(path: String, message: String)
 
     var description: String {
         switch self {
@@ -34,6 +35,8 @@ enum GwmError: Error, CustomStringConvertible {
             return "Ghostty (\(GhosttyScript.bundleID)) is not installed."
         case let .grid(error):
             return error.description
+        case let .config(path, message):
+            return "Invalid config file \(path): \(message)"
         }
     }
 
@@ -41,6 +44,7 @@ enum GwmError: Error, CustomStringConvertible {
         switch self {
         case .accessibilityDenied, .automationDenied: return 2
         case .grid(.noSuchDisplay): return 64
+        case .config: return 78
         default: return 1
         }
     }

@@ -1,8 +1,8 @@
 /// AppleScript text for driving Ghostty 1.3's scripting dictionary.
 public enum GhosttyScript {
     public static let bundleID = "com.mitchellh.ghostty"
-    /// `cds` is a zsh alias, so it is typed into the shell rather than run as `command`.
-    public static let defaultInput = "cds\n"
+    /// Typed into the shell (not run as `command`) so shell aliases and functions work.
+    public static let defaultInput = "claude\n"
 
     /// `nil` → default; `""` → plain shell; otherwise the text with a trailing newline.
     public static func initialInput(cmd: String?) -> String {

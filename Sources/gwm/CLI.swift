@@ -16,24 +16,33 @@ struct Gwm: ParsableCommand {
     )
 }
 
+/// Layout flags. Unset flags fall back to the config file, then to built-in defaults.
 struct LayoutOptions: ParsableArguments {
-    @Option(help: "Gap in points between windows and at the screen edges.")
-    var gap: Int = 8
+    @Option(help: "Gap in points between windows and at the screen edges (default: 8).")
+    var gap: Int?
 
-    @Option(help: "Target screen: 'ultrawide' (widest), 'main' (menu-bar screen) or a 1-based index.",
+    @Option(help: "Target screen: 'widest', 'main' (menu-bar screen) or a 1-based index (default: widest).",
             transform: parseDisplay)
-    var display: DisplayPreference = .widest
+    var display: DisplayPreference?
 
     @Option(name: .customLong("stage-strip"),
-            help: "Points kept free for the Stage Manager strip while Stage Manager is on (0 = don't reserve).")
-    var stageStrip: Int = 190
+            help: "Points kept free for the Stage Manager strip while Stage Manager is on; 0 = don't reserve (default: 190).")
+    var stageStrip: Int?
 
     @Flag(help: "Print the chosen screen and cell frames; do not create or move windows.")
     var dryRun = false
 
     func validate() throws {
-        guard (0...1000).contains(gap) else { throw ValidationError("--gap must be between 0 and 1000.") }
-        guard (0...2000).contains(stageStrip) else { throw ValidationError("--stage-strip must be between 0 and 2000.") }
+        if let gap, !gapRange.contains(gap) {
+            throw ValidationError("--gap must be between 0 and \(gapRange.upperBound).")
+        }
+        if let stageStrip, !stageStripRange.contains(stageStrip) {
+            throw ValidationError("--stage-strip must be between 0 and \(stageStripRange.upperBound).")
+        }
+    }
+
+    func overrides(cmd: String? = nil) -> Config {
+        Config(cmd: cmd, gap: gap, display: display, stageStrip: stageStrip)
     }
 }
 
@@ -46,7 +55,7 @@ func parseGrid(_ text: String) throws -> GridSpec {
 
 func parseDisplay(_ text: String) throws -> DisplayPreference {
     guard let preference = DisplayPreference.parse(text) else {
-        throw ValidationError("Invalid display '\(text)'. Use 'ultrawide', 'main' or a 1-based index.")
+        throw ValidationError("Invalid display '\(text)'. Use 'widest', 'main' or a 1-based index.")
     }
     return preference
 }
@@ -60,22 +69,26 @@ struct Launch: ParsableCommand {
     @Argument(help: "Grid as RxC, e.g. 2x3.", transform: parseGrid)
     var grid: GridSpec
 
-    @Option(help: "Initial input typed into each window (default: cds). Use \"\" for a plain shell.")
+    @Option(help: "Text typed into each new window (default: claude, or `cmd` in the config file). Use \"\" for a plain shell.")
     var cmd: String?
 
     @OptionGroup var layout: LayoutOptions
 
     func run() throws {
         try reportingErrors {
-            let target = try Target.resolve(grid: grid, options: layout)
+            let file = try ConfigFile.load()
+            let settings = layout.overrides(cmd: cmd).merged(over: file.config)
+            let target = try Target.resolve(grid: grid, settings: settings)
+            let input = GhosttyScript.initialInput(cmd: settings.cmd)
             if layout.dryRun {
+                print(file.summary)
+                print("Initial input: " + (input.isEmpty ? "(none, plain shell)" : input.trimmingCharacters(in: .newlines)))
                 target.printSummary(grid: grid)
                 return
             }
             let workingDirectory = ProcessInfo.processInfo.environment["PWD"]
                 ?? FileManager.default.currentDirectoryPath
-            try LaunchFlow(target: target, input: GhosttyScript.initialInput(cmd: cmd),
-                           workingDirectory: workingDirectory).run()
+            try LaunchFlow(target: target, input: input, workingDirectory: workingDirectory).run()
         }
     }
 }

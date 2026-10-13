@@ -62,20 +62,20 @@ private let ultrawideAbove = ScreenInfo(
 
 @Suite struct DisplayPreferenceTests {
     @Test(arguments: [
-        ("ultrawide", DisplayPreference.widest), ("ULTRAWIDE", .widest), ("main", .main),
+        ("widest", DisplayPreference.widest), ("WIDEST", .widest), ("main", .main),
         ("1", .index(1)), ("2", .index(2)),
     ])
     func parsesValid(text: String, expected: DisplayPreference) {
         #expect(DisplayPreference.parse(text) == expected)
     }
 
-    @Test(arguments: ["0", "-1", "abc", "", "1.5", " 1"])
+    @Test(arguments: ["0", "-1", "abc", "", "1.5", " 1", "ultrawide"])
     func rejectsInvalid(text: String) {
         #expect(DisplayPreference.parse(text) == nil)
     }
 
     @Test func describesForHelpText() {
-        #expect(DisplayPreference.widest.description == "ultrawide")
+        #expect(DisplayPreference.widest.description == "widest")
         #expect(DisplayPreference.index(2).description == "2")
     }
 }

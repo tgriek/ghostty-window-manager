@@ -25,7 +25,7 @@ public enum DisplayPreference: Equatable, Sendable, CustomStringConvertible {
 
     public static func parse(_ text: String) -> DisplayPreference? {
         switch text.lowercased() {
-        case "ultrawide": return .widest
+        case "widest": return .widest
         case "main": return .main
         default:
             guard !text.isEmpty, text.allSatisfy({ $0.isASCII && $0.isNumber }),
@@ -36,7 +36,7 @@ public enum DisplayPreference: Equatable, Sendable, CustomStringConvertible {
 
     public var description: String {
         switch self {
-        case .widest: return "ultrawide"
+        case .widest: return "widest"
         case .main: return "main"
         case let .index(index): return String(index)
         }

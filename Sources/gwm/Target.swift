@@ -8,15 +8,15 @@ struct Target {
     let area: Rect
     let cells: [Rect]
 
-    static func resolve(grid: GridSpec, options: LayoutOptions) throws -> Target {
+    static func resolve(grid: GridSpec, settings: Config) throws -> Target {
         let screens = Screens.current()
-        let choice = try pickScreen(screens, options.display)
+        let choice = try pickScreen(screens, settings.resolvedDisplay)
         if let notice = choice.notice { note(notice) }
         var area = cocoaToAX(layoutFrame(of: choice.screen, menuBarHeight: MenuBar.height()),
                              primaryHeight: primaryHeight(screens))
-        let strip = StageManager.strip(width: Double(options.stageStrip))
+        let strip = StageManager.strip(width: Double(settings.resolvedStageStrip))
         if let strip { area = reservingStageStrip(area, strip) }
-        let gap = Double(options.gap)
+        let gap = Double(settings.resolvedGap)
         try validateCellSize(grid, in: area, gap: gap)
         return Target(screens: screens, screen: choice.screen, strip: strip, area: area,
                       cells: layout(grid, in: area, gap: gap))

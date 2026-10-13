@@ -11,11 +11,13 @@ struct TileFlow {
         let windows = ghostty.windows().compactMap { window in window.frame.map { (window: window, frame: $0) } }
         guard !windows.isEmpty else { throw GwmError.noWindows }
 
+        let file = try ConfigFile.load()
         let grid = self.grid ?? GridSpec.auto(count: windows.count)
-        let target = try Target.resolve(grid: grid, options: options)
+        let target = try Target.resolve(grid: grid, settings: options.overrides().merged(over: file.config))
         let plan = planTile(windowFrames: windows.map(\.frame), cells: target.cells)
 
         if options.dryRun {
+            print(file.summary)
             target.printSummary(grid: grid)
             print("Windows:")
             for assignment in plan.assignments {
