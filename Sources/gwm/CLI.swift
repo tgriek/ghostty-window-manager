@@ -68,7 +68,10 @@ struct Launch: ParsableCommand {
                 target.printSummary(grid: grid)
                 return
             }
-            throw ValidationError("Opening windows is not wired up yet; use --dry-run.")
+            let workingDirectory = ProcessInfo.processInfo.environment["PWD"]
+                ?? FileManager.default.currentDirectoryPath
+            try LaunchFlow(target: target, input: GhosttyScript.initialInput(cmd: cmd),
+                           workingDirectory: workingDirectory).run()
         }
     }
 }
