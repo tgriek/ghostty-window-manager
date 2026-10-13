@@ -7,7 +7,7 @@ struct Gwm: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "gwm",
         abstract: "Open and tile Ghostty windows in a grid.",
-        subcommands: [Launch.self],
+        subcommands: [Launch.self, Tile.self],
         defaultSubcommand: Launch.self
     )
 }
@@ -70,5 +70,20 @@ struct Launch: ParsableCommand {
             }
             throw ValidationError("Opening windows is not wired up yet; use --dry-run.")
         }
+    }
+}
+
+struct Tile: ParsableCommand {
+    static let configuration = CommandConfiguration(
+        abstract: "Re-tile all open Ghostty windows in on-screen reading order."
+    )
+
+    @Argument(help: "Grid as RxC; omit to choose one from the window count.", transform: parseGrid)
+    var grid: GridSpec?
+
+    @OptionGroup var layout: LayoutOptions
+
+    func run() throws {
+        try reportingErrors { try TileFlow(grid: grid, options: layout).run() }
     }
 }
