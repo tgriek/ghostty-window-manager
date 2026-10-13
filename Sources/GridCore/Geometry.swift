@@ -1,3 +1,5 @@
+import Foundation
+
 /// A rectangle in points. Which coordinate space it lives in (Cocoa or AX)
 /// is stated by whoever produces it.
 public struct Rect: Equatable, Sendable, CustomStringConvertible {
@@ -17,7 +19,7 @@ public struct Rect: Equatable, Sendable, CustomStringConvertible {
     public var maxY: Double { y + height }
 
     public var description: String {
-        "x=\(Int(x.rounded())) y=\(Int(y.rounded())) w=\(Int(width.rounded())) h=\(Int(height.rounded()))"
+        "x=\(points(x)) y=\(points(y)) w=\(points(width)) h=\(points(height))"
     }
 
     /// True when every edge is within `tolerance` points of `other`'s.
@@ -27,4 +29,10 @@ public struct Rect: Equatable, Sendable, CustomStringConvertible {
             && abs(maxX - other.maxX) <= tolerance
             && abs(maxY - other.maxY) <= tolerance
     }
+}
+
+/// A point value as a whole number, without trapping on values outside `Int`'s range.
+func points(_ value: Double) -> String {
+    let rounded = value.rounded()
+    return abs(rounded) < 1e15 ? String(Int(rounded)) : String(format: "%.0f", rounded)
 }

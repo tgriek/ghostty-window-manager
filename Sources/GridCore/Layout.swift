@@ -6,7 +6,7 @@ public enum GridError: Error, Equatable, CustomStringConvertible {
     public var description: String {
         switch self {
         case let .cellsTooSmall(grid, width, height):
-            return "A \(grid) grid gives \(Int(width))×\(Int(height)) pt cells; the minimum is "
+            return "A \(grid) grid gives \(points(width))×\(points(height)) pt cells; the minimum is "
                 + "\(Int(minimumCellWidth))×\(Int(minimumCellHeight)) pt. Use fewer rows/columns or a smaller --gap."
         case .noScreens:
             return "No screens found."

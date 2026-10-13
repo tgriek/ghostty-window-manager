@@ -7,6 +7,10 @@ struct Gwm: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "gwm",
         abstract: "Open and tile Ghostty windows in a grid.",
+        usage: """
+            gwm <RxC> [--cmd <text>] [<options>]
+            gwm tile [<RxC>] [<options>]
+            """,
         subcommands: [Launch.self, Tile.self],
         defaultSubcommand: Launch.self
     )
@@ -28,8 +32,8 @@ struct LayoutOptions: ParsableArguments {
     var dryRun = false
 
     func validate() throws {
-        guard gap >= 0 else { throw ValidationError("--gap must be 0 or greater.") }
-        guard stageStrip >= 0 else { throw ValidationError("--stage-strip must be 0 or greater.") }
+        guard (0...1000).contains(gap) else { throw ValidationError("--gap must be between 0 and 1000.") }
+        guard (0...2000).contains(stageStrip) else { throw ValidationError("--stage-strip must be between 0 and 2000.") }
     }
 }
 
