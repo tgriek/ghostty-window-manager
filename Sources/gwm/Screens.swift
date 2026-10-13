@@ -23,6 +23,13 @@ enum Screens {
     }
 }
 
+enum MenuBar {
+    /// Height macOS keeps free for the menu bar on every screen; 0 when it auto-hides.
+    static func height() -> Double {
+        UserDefaults.standard.bool(forKey: "_HIHideMenuBar") ? 0 : Double(NSStatusBar.system.thickness)
+    }
+}
+
 enum StageManager {
     /// The strip to keep free, read from the Stage Manager and Dock preferences.
     static func strip(width: Double) -> StageStrip? {

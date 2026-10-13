@@ -112,3 +112,13 @@ public func reservingStageStrip(_ area: Rect, _ strip: StageStrip) -> Rect {
         return Rect(x: area.x, y: area.y, width: area.width - width, height: area.height)
     }
 }
+
+/// The screen's `visibleFrame` (Cocoa coordinates), with its top trimmed so it starts at
+/// least `menuBarHeight` below the screen's top edge. macOS keeps windows below the menu
+/// bar on every display, but a secondary screen's `visibleFrame` can still include it.
+/// Pass 0 when the menu bar auto-hides.
+public func layoutFrame(of screen: ScreenInfo, menuBarHeight: Double) -> Rect {
+    let visible = screen.visibleFrame
+    let top = min(visible.maxY, screen.frame.maxY - menuBarHeight)
+    return Rect(x: visible.x, y: visible.y, width: visible.width, height: max(0, top - visible.y))
+}

@@ -142,3 +142,38 @@ private let ultrawideAbove = ScreenInfo(
         #expect(cells.map(\.maxX).max() == 6392)
     }
 }
+
+@Suite struct LayoutFrameTests {
+    private let ultrawideNoMenuBar = ScreenInfo(
+        name: "DELL U4025QW",
+        frame: Rect(x: 1728, y: -233, width: 3200, height: 1350),
+        visibleFrame: Rect(x: 1728, y: -233, width: 3200, height: 1350),
+        isMain: false, isBuiltin: false)
+
+    @Test func reservesMenuBarWhenVisibleFrameIncludesIt() {
+        // Seen live: the ultrawide's visibleFrame equals its frame, yet macOS keeps
+        // windows 22 pt below its top edge.
+        #expect(layoutFrame(of: ultrawideNoMenuBar, menuBarHeight: 22)
+            == Rect(x: 1728, y: -233, width: 3200, height: 1328))
+    }
+
+    @Test func keepsVisibleFrameThatAlreadyExcludesMenuBar() {
+        let builtin = ScreenInfo(
+            name: "Built-in",
+            frame: Rect(x: 0, y: 0, width: 1728, height: 1117),
+            visibleFrame: Rect(x: 0, y: 0, width: 1728, height: 1084),
+            isMain: true, isBuiltin: true)
+        #expect(layoutFrame(of: builtin, menuBarHeight: 22) == builtin.visibleFrame)
+    }
+
+    @Test func noReservationWhenMenuBarAutoHides() {
+        #expect(layoutFrame(of: ultrawideNoMenuBar, menuBarHeight: 0) == ultrawideNoMenuBar.visibleFrame)
+    }
+
+    @Test func topRowStartsBelowMenuBarInAXSpace() {
+        let area = cocoaToAX(layoutFrame(of: ultrawideNoMenuBar, menuBarHeight: 22), primaryHeight: 1117)
+        let cells = layout(GridSpec(rows: 2, cols: 3)!, in: area, gap: 8)
+        #expect(cells.first?.y == 30)          // 0 + 22 menu bar + 8 gap: where macOS clamped the windows
+        #expect(cells.last?.maxY == 1342)      // bottom edge unchanged
+    }
+}

@@ -12,7 +12,8 @@ struct Target {
         let screens = Screens.current()
         let choice = try pickScreen(screens, options.display)
         if let notice = choice.notice { note(notice) }
-        var area = cocoaToAX(choice.screen.visibleFrame, primaryHeight: primaryHeight(screens))
+        var area = cocoaToAX(layoutFrame(of: choice.screen, menuBarHeight: MenuBar.height()),
+                             primaryHeight: primaryHeight(screens))
         let strip = StageManager.strip(width: Double(options.stageStrip))
         if let strip { area = reservingStageStrip(area, strip) }
         let gap = Double(options.gap)
